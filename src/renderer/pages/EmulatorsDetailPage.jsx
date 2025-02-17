@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useEffect, useState, useContext, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { GlobalContext } from 'context/globalContext';
@@ -40,6 +41,7 @@ import {
 const emuData = require('data/emuData.json');
 
 function EmulatorsDetailPage() {
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { state, setState, stateCurrentConfigs, setStateCurrentConfigs } =
     useContext(GlobalContext);
@@ -78,6 +80,8 @@ function EmulatorsDetailPage() {
   const [ps1Bios, setps1Bios] = useState(null);
   const [ps2Bios, setps2Bios] = useState(null);
   const [switchBios, setSwitchBios] = useState(null);
+  const [citronBios, setCitronBios] = useState(null);
+  const [ryujinxBios, setRyujinxBios] = useState(null);
   const [segaCDBios, setSegaCDBios] = useState(null);
   const [saturnBios, setSaturnBios] = useState(null);
   const [dreamcastBios, setDreamcastBios] = useState(null);
@@ -250,6 +254,13 @@ function EmulatorsDetailPage() {
         case 'checkYuzuBios':
           setSwitchBios(biosStatus);
           break;
+        case 'checkRyujinxBios':
+          setRyujinxBios(biosStatus);
+          break;
+        case 'checkCitronBios':
+          setCitronBios(biosStatus);
+          break;
+
         case 'checkSegaCDBios':
           setSegaCDBios(biosStatus);
           break;
@@ -300,6 +311,9 @@ function EmulatorsDetailPage() {
         img = rpcs3Controls;
         break;
       case 'yuzu':
+        img = yuzuControls;
+        break;
+      case 'citron':
         img = yuzuControls;
         break;
       case 'ryujinx':
@@ -391,6 +405,9 @@ function EmulatorsDetailPage() {
         img = rpcs3Hotkeys;
         break;
       case 'yuzu':
+        img = yuzuHotkeys;
+        break;
+      case 'citron':
         img = yuzuHotkeys;
         break;
       case 'ryujinx':
@@ -502,7 +519,15 @@ function EmulatorsDetailPage() {
           });
           // We set the emu as install = yes
 
-          if (emulator === 'esde' || emulator === 'pegasus') {
+          if (
+            emulator === 'esde' ||
+            emulator === 'pegasus' ||
+            emulator === 'srm'
+          ) {
+            if (emulator === 'srm') {
+              emulator = 'steam';
+            }
+
             setState({
               ...state,
               installFrontends: {
@@ -967,7 +992,6 @@ function EmulatorsDetailPage() {
     switch (emulator) {
       case 'ra':
         checkBios('checkPS1BIOS');
-        checkBios('checkYuzuBios');
         checkBios('checkSegaCDBios');
         checkBios('checkSaturnBios');
         checkBios('checkDSBios');
@@ -985,6 +1009,13 @@ function EmulatorsDetailPage() {
       case 'yuzu':
         checkBios('checkYuzuBios');
         break;
+      case 'citron':
+        checkBios('checkCitronBios');
+        break;
+      case 'ryujinx':
+        checkBios('checkRyujinxBios');
+        break;
+
       default:
     }
 
@@ -1106,44 +1137,44 @@ function EmulatorsDetailPage() {
   }, [emulatorAlternative]);
 
   return (
-    <div style={{ height: '100vh' }}>
-      <Wrapper>
-        <Header title={emuData[emulatorSelected].name} />
+    <Wrapper>
+      <Header title={emuData[emulatorSelected].name} />
 
-        {updates && (
-          <EmuDetail
-            mode={mode}
-            disabledNext={disabledNext}
-            disabledBack={disabledBack}
-            emuData={emuData[emulatorSelected]}
-            updateAvailable={updates[emulator] !== undefined}
-            ps1={ps1Bios}
-            ps2={ps2Bios}
-            nswitch={switchBios}
-            segacd={segaCDBios}
-            saturn={saturnBios}
-            dreamcast={dreamcastBios}
-            nds={DSBios}
-            onChange={selectEmu}
-            onClick={resetEmu}
-            onClickCustomParser={showCustom}
-            onClickOptionalParser={installOptional}
-            onClickInstall={installEmu}
-            onClickReInstall={reInstallEmu}
-            onClickHotkeys={showHotkeys}
-            onClickControls={showControls}
-            onClickUninstall={uninstallEmu}
-            onClickMigrate={onClickMigrate}
-            onClickParsers={parserSeletor}
-            onClickRemoveParsers={removeParsers}
-            installEmus={installEmus[emulatorSelected]}
-            yuzuEAaskToken={yuzuEAaskToken}
-          />
-        )}
-        <Footer next={false} />
-        <EmuModal modal={modal} />
-      </Wrapper>
-    </div>
+      {updates && (
+        <EmuDetail
+          mode={mode}
+          disabledNext={disabledNext}
+          disabledBack={disabledBack}
+          emuData={emuData[emulatorSelected]}
+          updateAvailable={updates[emulator] !== undefined}
+          ps1={ps1Bios}
+          ps2={ps2Bios}
+          nswitch={switchBios}
+          rswitch={ryujinxBios}
+          cswitch={citronBios}
+          segacd={segaCDBios}
+          saturn={saturnBios}
+          dreamcast={dreamcastBios}
+          nds={DSBios}
+          onChange={selectEmu}
+          onClick={resetEmu}
+          onClickCustomParser={showCustom}
+          onClickOptionalParser={installOptional}
+          onClickInstall={installEmu}
+          onClickReInstall={reInstallEmu}
+          onClickHotkeys={showHotkeys}
+          onClickControls={showControls}
+          onClickUninstall={uninstallEmu}
+          onClickMigrate={onClickMigrate}
+          onClickParsers={parserSeletor}
+          onClickRemoveParsers={removeParsers}
+          installEmus={installEmus[emulatorSelected]}
+          yuzuEAaskToken={yuzuEAaskToken}
+        />
+      )}
+      <Footer next={false} />
+      <EmuModal modal={modal} />
+    </Wrapper>
   );
 }
 

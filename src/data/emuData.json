@@ -7,7 +7,9 @@
     "description": "",
     "special_configuration": "Custom textures for the NES and N64 using EmuDeck's pre-created folder: Emulation/hdpacks",
     "bios": ["ps1", "segacd", "saturn", "nds", "dreamcast"],
-    "systems": "Retro Game Systems, including but not limited to, Nintendo 64, Saturn and Dreamcast",
+    "systems": [
+      "Retro Game Systems, including but not limited to, Nintendo 64, Saturn and Dreamcast"
+    ],
     "hotkeys": {
       "0": ["Action", "Keys"],
       "1": ["Menu", "L3+R3"],
@@ -152,11 +154,32 @@
   },
   "citra": {
     "id": "citra",
-    "name": "Citra",
+    "name": "PabloMK7's Citra",
     "code": "Citra",
 
-    "description": "Citra was a Nintendo 3DS emulator, it was shutdown after a settlement with Nintendo and it's no longer available to install. Emudeck does not download nor can it guarantee support if you run into any issues.",
-    "special_configuration": "If you already have your citra-qt.AppImage in the /home/deck/Applications folder it will keep working. Same if you are on windows and you have it on your USERFOLDER/EmuDeck/EmulationStation-DE/Emulators/citra folder. ",
+    "description": "PabloMK7's Citra is a Nintendo 3DS emulator, forked from the previous Citra project.",
+    "special_configuration": "",
+    "bios": [],
+    "systems": "Nintendo 3DS",
+    "hotkeys": {
+      "0": ["Action", "Keys"],
+      "1": ["Exit", "R5 (Longpress)"],
+      "2": ["FullScreen", "L4"],
+      "3": ["Swap Screens", "R4"],
+      "4": ["Toggle Layout", "L5"],
+      "5": ["Toggle Layout", "L5"],
+      "6": ["Save State", "Left Trackpad"],
+      "7": ["Load State", "Left Trackpad"],
+      "8": ["Fast Forward", "Left Trackpad"],
+      "9": ["Pause", "Left Trackpad"]
+    }
+  },
+  "lime3ds": {
+    "id": "lime3ds",
+    "name": "Lime3DS",
+    "code": "Lime3DS",
+    "description": "Lime3DS is an open-source, easy-to-use Nintendo 3DS emulator, forked from Citra. Lime3DS has many features, such as firmware emulation, amiibo loading, and partial support for homebrew applications.",
+    "special_configuration": "",
     "bios": [],
     "systems": "Nintendo 3DS",
     "hotkeys": {
@@ -227,6 +250,26 @@
       "7": ["Filter", "START+DPAD ⬅️"]
     }
   },
+  "citron": {
+    "id": "citron",
+    "name": "Citron",
+    "code": "Citron",
+
+    "description": "Emudeck does not download this emulator nor can it guarantee support if you run into any issues.",
+    "special_configuration": " If you already have your citron.AppImage in the /home/deck/Applications folder it will keep working. Same if you are on windows and you have it on your USERFOLDER/AppData/Roaming/EmuDeck/Emulators/citron/ folder. Firmware: Place keys and firmware place in: Emulation/bios/citron.",
+    "bios": ["cswitch"],
+    "systems": "Nintendo Switch",
+    "hotkeys": {
+      "0": ["Action", "Keys"],
+      "1": ["Exit", "SELECT+START"],
+      "2": ["Fast Forward", "SELECT+R2"],
+      "3": ["Pause", "SELECT+A"],
+      "4": ["Menu", "SELECT+R3"],
+      "5": ["Docked Mode", "START+DPAD ⬆️"],
+      "6": ["GPU Accuracy", "START+DPAD ⬇️"],
+      "7": ["Filter", "START+DPAD ⬅️"]
+    }
+  },
   "ryujinx": {
     "id": "ryujinx",
     "name": "Ryujinx",
@@ -234,7 +277,7 @@
 
     "description": "Ryujinx is a Nintendo Switch emulator, originally developed by gdkchan. Ryujinx can promise excellent accuracy for your favorite Nintendo Switch games.",
     "special_configuration": "Firmware: Install firmware through the Ryujinx GUI. Place keys in: Emulation/bios/ryujinx/keys.",
-    "bios": [],
+    "bios": ["rswitch"],
     "systems": "Nintendo Switch",
     "hotkeys": {
       "0": ["Action", "Keys"],
@@ -423,6 +466,17 @@
     "special_configuration": "",
     "bios": [],
     "systems": "Atari Jaguar",
+    "hotkeys": {}
+  },
+  "shadps4": {
+    "id": "shadps4",
+    "name": "ShadPS4",
+    "code": "ShadPS4",
+    "wiki": "",
+    "description": "ShadPS4 is an early experimental open-source emulator for the PlayStation 4 (PS4).",
+    "special_configuration": "",
+    "bios": [],
+    "systems": "Playstation 4",
     "hotkeys": {}
   }
 }

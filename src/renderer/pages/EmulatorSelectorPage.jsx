@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useState, useContext, useRef, useEffect } from 'react';
 import { GlobalContext } from 'context/globalContext';
 import Wrapper from 'components/molecules/Wrapper/Wrapper';
@@ -15,9 +16,11 @@ import {
   imgppsspp,
   imgduckstation,
   imgcitra,
+  imglime3ds,
   imgpcsx2,
   imgrpcs3,
   imgyuzu,
+  imgcitron,
   imgryujinx,
   imgcemu,
   imgxemu,
@@ -34,6 +37,7 @@ import {
   imgsupermodel,
   imgmodel2,
   imgbigpemu,
+  imgshadps4,
 } from 'components/utils/images/images';
 
 const images = {
@@ -44,9 +48,11 @@ const images = {
   ppsspp: imgppsspp,
   duckstation: imgduckstation,
   citra: imgcitra,
+  lime3ds: imglime3ds,
   pcsx2: imgpcsx2,
   rpcs3: imgrpcs3,
   yuzu: imgyuzu,
+  citron: imgcitron,
   melonds: imgmelonds,
   ryujinx: imgryujinx,
   cemu: imgcemu,
@@ -63,9 +69,11 @@ const images = {
   supermodel: imgsupermodel,
   model2: imgmodel2,
   bigpemu: imgbigpemu,
+  shadps4: imgshadps4,
 };
 
 function EmulatorSelectorPage() {
+  const { t, i18n } = useTranslation();
   const { state, setState } = useContext(GlobalContext);
   const { device, installEmus, emulatorAlternative, overwriteConfigEmus } =
     state;
@@ -144,6 +152,20 @@ function EmulatorSelectorPage() {
             <p>
               Xenia is an experimental Emulator, don't expect a lot of games to
               work.
+            </p>
+          ),
+        };
+        // setStatePage({ ...statePage, modal: modalData });
+      }
+
+      if (emulatorProp === 'shadps4') {
+        modalData = {
+          active: true,
+          header: <span className="h4">ShadPS4 Emulator - Disclaimer</span>,
+          body: (
+            <p>
+              ShadPS4 is an experimental Emulator, don't expect a lot of games
+              to work.
             </p>
           ),
         };
@@ -950,12 +972,14 @@ function EmulatorSelectorPage() {
       function launchModal() {
         modalData = {
           ...modalData,
-          header: <span className="h4">RetroArch or Standalone Emulator?</span>,
+          header: (
+            <span className="h4">{t('EmulatorSelectorPage.standaloneRA')}</span>
+          ),
           css: 'emumodal--sm',
           footer: (
             <>
               <BtnSimple
-                css="btn-simple--1"
+                css="btn-simple--2"
                 type="button"
                 aria={emuOption1}
                 onClick={() =>
@@ -966,7 +990,7 @@ function EmulatorSelectorPage() {
                 {emuOption1}
               </BtnSimple>
               <BtnSimple
-                css="btn-simple--2"
+                css="btn-simple--1"
                 type="button"
                 aria={emuOption2}
                 onClick={() =>
@@ -977,12 +1001,12 @@ function EmulatorSelectorPage() {
                 {emuOption2}
               </BtnSimple>
               <BtnSimple
-                css="btn-simple--3"
+                css="btn-simple--2"
                 type="button"
                 aria="Go Back"
                 onClick={() => setAlternativeEmulator(system, 'both', 'both')}
               >
-                Both
+                {t('general.both')}
               </BtnSimple>
             </>
           ),
@@ -994,18 +1018,21 @@ function EmulatorSelectorPage() {
   }, [installEmus]);
 
   return (
-    <div style={{ height: '100vh' }}>
-      <Wrapper>
-        <Header title={`Emulators and tools for ${device}`} />
-        <EmulatorSelector data={data} onClick={toggleEmus} images={images} />
-        <Footer
-          next="emulator-configuration"
-          disabledNext={disabledNext}
-          disabledBack={disabledBack}
-        />
-        <EmuModal modal={modal} />
-      </Wrapper>
-    </div>
+    <Wrapper>
+      <Header title={t('EmulatorSelectorPage.title', { device: device })} />
+      <EmulatorSelector
+        installEmus={installEmus}
+        data={data}
+        onClick={toggleEmus}
+        images={images}
+      />
+      <Footer
+        next="emulator-configuration"
+        disabledNext={disabledNext}
+        disabledBack={disabledBack}
+      />
+      <EmuModal modal={modal} />
+    </Wrapper>
   );
 }
 

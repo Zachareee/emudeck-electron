@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, {
   useEffect,
   useState,
@@ -15,6 +16,8 @@ import Main from 'components/organisms/Main/Main';
 import ProgressBar from 'components/atoms/ProgressBar/ProgressBar';
 import { useNavigate } from 'react-router-dom';
 import { BtnSimple } from 'getbasecore/Atoms';
+import Card from 'components/molecules/Card/Card';
+import { useFetchCond } from 'hooks/useFetchCond';
 
 // import { useTranslation } from 'react-i18next';
 import Welcome from 'components/organisms/Wrappers/Welcome';
@@ -39,6 +42,7 @@ import {
 } from 'components/utils/images/icons';
 
 function WelcomePage() {
+  const { t, i18n } = useTranslation();
   // const { t } = useTranslation();
   const ipcChannel = window.electron.ipcRenderer;
   const { state, setState } = useContext(GlobalContext);
@@ -53,14 +57,61 @@ function WelcomePage() {
     data: '',
     modal: undefined,
     dom: undefined,
+    news: undefined,
+    game_of_the_month: undefined,
   });
-  const { disabledNext, disabledBack, updates, modal, dom } = statePage;
+  const {
+    disabledNext,
+    disabledBack,
+    updates,
+    modal,
+    dom,
+    news,
+    game_of_the_month,
+  } = statePage;
 
   const navigate = useNavigate();
+
+  const newsWS = useFetchCond(
+    `https://token.emudeck.com/news.php?branch=${branch}`
+  );
+  useEffect(() => {
+    newsWS.post({}).then((data) => {
+      setStatePage({
+        ...statePage,
+        news: data[0].news,
+        game_of_the_month: data[0].game_of_the_month,
+      });
+    });
+  }, []);
+
   const selectMode = (value) => {
-    setState({ ...state, mode: value });
-    if (second) {
-      navigate('/rom-storage');
+    console.log({ value });
+    if (value === 'android') {
+      navigate('/android-welcome');
+    } else {
+      if (value === 'easy' && second === false && system == 'win32') {
+        console.log('esde default');
+        setState({
+          ...state,
+          installFrontends: {
+            ...state.installFrontends,
+            esde: { ...state.installFrontends.esde, status: true },
+            deckyromlauncher: {
+              ...state.installFrontends.deckyromlauncher,
+              status: false,
+            },
+          },
+          mode: value,
+        });
+      } else {
+        console.log('only state');
+        setState({ ...state, mode: value });
+      }
+
+      if (second) {
+        navigate('/rom-storage');
+      }
     }
   };
 
@@ -82,18 +133,8 @@ function WelcomePage() {
     if (systemName === 'ERROR') {
       const modalData = {
         active: true,
-        header: (
-          <span className="h4">Error detecting your Operating System</span>
-        ),
-        body: (
-          <>
-            <p>Click on the Close button to try again</p>
-            <p>
-              If the issue persists, please contact us on Discord:
-              https://discord.com/invite/b9F7GpXtFP
-            </p>
-          </>
-        ),
+        header: <span className="h4">{t('WelcomePage.errorModal.title')}</span>,
+        body: t('WelcomePage.errorModal.description'),
         footer: '',
         css: 'emumodal--xs',
       };
@@ -128,13 +169,6 @@ function WelcomePage() {
         localStorage.setItem('ogStateAlternative', '');
         localStorage.setItem('ogStateEmus', '');
       }
-
-      if (second === true && mode === 'expert') {
-        navigate('/emulators');
-      }
-      if (second === true && mode === 'easy') {
-        navigate('/emulators');
-      }
     });
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -148,40 +182,78 @@ function WelcomePage() {
   }, [mode]);
 
   return (
-    <div style={{ height: '100vh' }}>
-      <Wrapper aside={second === true}>
-        {second === false && (
-          <Header title={`Welcome to EmuDeck for ${systemName}`} />
-        )}
+    <Wrapper aside={second === true}>
+      {second === false && (
+        <>
+          <Header title={t('WelcomePage.title', { systemName: systemName })} />
+          <p className="lead">{t('WelcomePage.description')}:</p>
+        </>
+      )}
 
-        {systemName !== 'ERROR' && second === false && (
-          <Welcome
-            alert={
-              second
-                ? ``
-                : 'Do you need help installing EmuDeck for the first time? <a href="https://youtu.be/Y5r2WZAImuY" target="_blank">Check out this guide</a>'
-            }
-            alertCSS="alert--info"
-            onClick={selectMode}
-          />
-        )}
+      {systemName !== 'ERROR' && second === false && (
+        <Welcome onClick={selectMode} />
+      )}
 
-        {second === false && systemName !== 'ERROR' && (
-          <Footer
-            back={second ? 'tools-and-stuff' : false}
-            backText={second ? 'Tools & stuff' : 'Install EmuDeck First'}
-            third={system !== 'win32' ? 'change-log' : ''}
-            thirdText="See changelog"
-            fourthText="Exit EmuDeck"
-            next="rom-storage"
-            exit={gamemode}
-            disabledNext={second ? false : disabledNext}
-            disabledBack={second ? false : disabledBack}
-          />
-        )}
-        <EmuModal modal={modal} />
-      </Wrapper>
-    </div>
+      {second === false && systemName !== 'ERROR' && (
+        <Footer
+          back={false}
+          next="rom-storage"
+          exit={gamemode}
+          disabledNext={second ? false : disabledNext}
+          disabledBack={second ? false : disabledBack}
+        />
+      )}
+      <EmuModal modal={modal} />
+
+      {second && (
+        <>
+          <Header title="EmuDeck News" />
+          <Main>
+            <div className="cards cards--maxi">
+              {news &&
+                news.map((item) => {
+                  return (
+                    <Card key={item.link} css="is-selected">
+                      <a target={item.target} href={item.link}>
+                        <span class="h5">{item.title}</span>
+                        <p>{item.desc}</p>
+                        <img src={item.img} />
+                      </a>
+                    </Card>
+                  );
+                })}
+            </div>
+            <span class="h2">
+              Games of the month by{' '}
+              <a
+                href="https://retrohandhelds.gg"
+                target="blank"
+                style={{ display: 'inline' }}
+              >
+                <img
+                  src="https://retrohandhelds.gg/wp-content/uploads/2023/08/rh_logo_white.svg"
+                  alt="RG logo"
+                  style={{ width: 40 }}
+                />
+              </a>
+            </span>
+            <div className="cards cards--maxi">
+              {game_of_the_month &&
+                game_of_the_month.map((item) => {
+                  return (
+                    <Card css="is-selected">
+                      <a target="blank" href={item.link}>
+                        <span class="h5">{item.title}</span>
+                        <img src={item.img} />
+                      </a>
+                    </Card>
+                  );
+                })}
+            </div>
+          </Main>
+        </>
+      )}
+    </Wrapper>
   );
 }
 

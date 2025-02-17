@@ -7,6 +7,7 @@ import WelcomePage from 'pages/WelcomePage';
 import DeviceSelectorPage from 'pages/DeviceSelectorPage';
 import EmulatorSelectorPage from 'pages/EmulatorSelectorPage';
 import FrontendSelectorPage from 'pages/FrontendSelectorPage';
+import AndroidFrontendSelectorPage from 'pages/AndroidFrontendSelectorPage';
 import ParserSelectorPage from 'pages/ParserSelectorPage';
 import EmulatorConfigurationPage from 'pages/EmulatorConfigurationPage';
 import RomStoragePage from 'pages/RomStoragePage';
@@ -27,8 +28,10 @@ import ESDEThemePage from 'pages/ESDEThemePage';
 import PowerToolsPage from 'pages/PowerToolsPage';
 import PowerControlsPage from 'pages/PowerControlsPage';
 import EmuDeckyPage from 'pages/EmuDeckyPage';
+import DeckyRomLauncherPage from 'pages/DeckyRomLauncherPage';
+import DeckyRomLauncherInstallPage from 'pages/DeckyRomLauncherInstallPage';
 import CheckBiosPage from 'pages/CheckBiosPage';
-import CheckDependenciesPage from 'pages/CheckDependenciesPage';
+
 import CHDToolPage from 'pages/CHDToolPage';
 import GyroDSUPage from 'pages/GyroDSUPage';
 import HelpPage from 'pages/HelpPage';
@@ -41,7 +44,7 @@ import CloudSyncConfigPage from 'pages/CloudSyncConfigPage';
 import GameModePage from 'pages/GameModePage';
 
 import ChangeLogPage from 'pages/ChangeLogPage';
-import SettingsPage from 'pages/SettingsPage';
+import QuickSettingsPage from 'pages/QuickSettingsPage';
 import UninstallPage from 'pages/UninstallPage';
 
 import RemotePlayWhateverPage from 'pages/RemotePlayWhateverPage';
@@ -49,7 +52,7 @@ import VideoGuidePage from 'pages/VideoGuidePage';
 import MigrationPage from 'pages/MigrationPage';
 import CopyGamesPage from 'pages/CopyGamesPage';
 
-import EmulatorsPage from 'pages/EmulatorsPage';
+import ManageEmulatorsPage from 'pages/ManageEmulatorsPage';
 import EmulatorsDetailPage from 'pages/EmulatorsDetailPage';
 
 import AutoSavePage from 'pages/AutoSavePage';
@@ -66,6 +69,9 @@ import Hotkeys from 'pages/Hotkeys';
 import FinishPage from 'pages/FinishPage';
 
 import AndroidRomStoragePage from 'pages/AndroidRomStoragePage';
+import AndroidEmulatorSelectorPage from 'pages/AndroidEmulatorSelectorPage';
+import AndroidRABezelsPage from 'pages/AndroidRABezelsPage';
+import AndroidOwnAPKPage from 'pages/AndroidOwnAPKPage';
 import AndroidEndPage from 'pages/AndroidEndPage';
 import AndroidWelcomePage from 'pages/AndroidWelcomePage';
 import AndroidSetupPage from 'pages/AndroidSetupPage';
@@ -92,9 +98,11 @@ export default function App() {
     duckstation: { id: 'duckstation', code: 'Duckstation', version: 0 },
     melonds: { id: 'melonds', code: 'melonDS', version: 0 },
     citra: { id: 'citra', code: 'Citra', version: 0 },
+    lime3ds: { id: 'lime3ds', code: 'Lime3DS', version: 0 },
     pcsx2: { id: 'pcsx2', code: 'PCSX2QT', version: 0 },
     rpcs3: { id: 'rpcs3', code: 'RPCS3', version: 0 },
     yuzu: { id: 'yuzu', code: 'Yuzu', version: 0 },
+    citron: { id: 'citron', code: 'Citron', version: 0 },
     ryujinx: { id: 'ryujinx', code: 'Ryujinx', version: 0 },
     xemu: { id: 'xemu', code: 'Xemu', version: 0 },
     cemu: { id: 'cemu', code: 'Cemu', version: 0 },
@@ -109,6 +117,7 @@ export default function App() {
     xenia: { id: 'xenia', code: 'Xenia', version: 0 },
     mgba: { id: 'mgba', code: 'mGBA', version: 0 },
     ares: { id: 'ares', code: 'ares', version: 0 },
+    shadps4: { id: 'shadps4', code: 'ShadPS4', version: 0 },
   });
 
   const [state, setState] = useState({
@@ -139,6 +148,7 @@ export default function App() {
     sudoPass: 'Decky!',
     language: 'en',
     android: {
+      bezels: true,
       second: false,
       installEmus: {
         ra: {
@@ -156,31 +166,31 @@ export default function App() {
           status: true,
           name: 'PPSSPP',
         },
-        duckstation: {
-          id: 'duckstation',
+        // citrammj: {
+        //   id: 'citrammj',
+        //   status: true,
+        //   name: 'CitraMMJ',
+        // },
+        lime3ds: {
+          id: 'lime3ds',
           status: true,
-          name: 'DuckStation',
+          name: 'Lime3DS',
         },
-        citra: {
-          id: 'citra',
+        nethersx2: {
+          id: 'nethersx2',
           status: true,
-          name: 'Citra',
-        },
-        aethersx2: {
-          id: 'aethersx2',
-          status: true,
-          name: 'AetherSX2',
+          name: 'NetherSX2',
         },
         yuzu: {
           id: 'yuzu',
           status: false,
           name: 'Yuzu',
         },
-        vita3k: {
-          id: 'vita3k',
-          status: true,
-          name: 'Vita3K',
-        },
+        // vita3k: {
+        //   id: 'vita3k',
+        //   status: false,
+        //   name: 'Vita3K',
+        // },
         scummvm: {
           id: 'scummvm',
           status: true,
@@ -203,10 +213,15 @@ export default function App() {
           status: true,
           name: 'PPSSPP',
         },
-        citra: {
-          id: 'citra',
+        // citra: {
+        //   id: 'citra',
+        //   status: true,
+        //   name: 'Citra',
+        // },
+        lime3ds: {
+          id: 'lime3ds',
           status: true,
-          name: 'Citra',
+          name: 'Lime3DS',
         },
         aethersx2: {
           id: 'pcsx2',
@@ -217,6 +232,11 @@ export default function App() {
           id: 'yuzu',
           status: false,
           name: 'Yuzu',
+        },
+        citron: {
+          id: 'citron',
+          status: false,
+          name: 'Citron',
         },
         pegasus: {
           id: 'pegasus',
@@ -239,7 +259,13 @@ export default function App() {
           id: 'pegasus',
           status: true,
           name: 'Pegasus',
-          desc: 'Add this launcher to your Steam Library. Recommended for big colections. You need to run EmulationStation parsers to show artwork in Pegasus Themes',
+          desc: 'Free but you need to scrape your artwork using Skrapper on your PC',
+        },
+        esde: {
+          id: 'esde',
+          status: false,
+          name: 'ES-DE',
+          desc: 'You need to bring your own ESDE apk as it is a paid app. Get it at http://patreon.com/es_de',
         },
       },
     },
@@ -268,163 +294,265 @@ export default function App() {
     themePegasus: ['https://github.com/PlayingKarrde/gameOS.git', 'gameOS'],
     homebrewGames: false,
     installEmus: {
-      ra: { id: 'ra', status: true, installed: undefined, name: 'RetroArch' },
+      ares: {
+        id: 'ares',
+        status: false,
+        installed: undefined,
+        name: 'ares',
+        platforms: 'Retro Systems',
+      },
+      bigpemu: {
+        id: 'bigpemu',
+        status: false,
+        installed: undefined,
+        name: 'BigPEmu',
+        platforms: 'Jaguar',
+      },
+      cemu: {
+        id: 'cemu',
+        status: true,
+        installed: undefined,
+        name: 'Cemu',
+        platforms: 'Nintendo WiiU',
+      },
+      citra: {
+        id: 'citra',
+        status: true,
+        installed: undefined,
+        name: 'Citra',
+        platforms: 'Nintendo 3DS',
+      },
+      citron: {
+        id: 'citron',
+        status: false,
+        installed: undefined,
+        name: 'Citron',
+        platforms: 'Nintendo Switch',
+      },
       dolphin: {
         id: 'dolphin',
         status: true,
         installed: undefined,
         name: 'Dolphin',
-      },
-      primehack: {
-        id: 'primehack',
-        status: true,
-        installed: undefined,
-        name: 'Primehack',
-      },
-      ppsspp: {
-        id: 'ppsspp',
-        status: true,
-        installed: undefined,
-        name: 'PPSSPP',
+        platforms: 'GameCube & Wii',
       },
       duckstation: {
         id: 'duckstation',
         status: true,
         installed: undefined,
         name: 'DuckStation',
-      },
-      melonds: {
-        id: 'melonds',
-        status: true,
-        installed: undefined,
-        name: 'melonDS',
-      },
-      citra: {
-        id: 'citra',
-        status: false,
-        installed: undefined,
-        name: 'Citra',
-      },
-      pcsx2: { id: 'pcsx2', status: true, installed: undefined, name: 'PCSX2' },
-      rpcs3: { id: 'rpcs3', status: true, installed: undefined, name: 'RPCS3' },
-      yuzu: { id: 'yuzu', status: false, installed: undefined, name: 'Yuzu' },
-      ryujinx: {
-        id: 'ryujinx',
-        status: true,
-        installed: undefined,
-        name: 'Ryujinx',
-      },
-      xemu: { id: 'xemu', status: true, installed: undefined, name: 'Xemu' },
-      cemu: { id: 'cemu', status: true, installed: undefined, name: 'Cemu' },
-      srm: {
-        id: 'srm',
-        status: true,
-        installed: undefined,
-        name: 'Steam Rom Manager',
-      },
-      rmg: {
-        id: 'rmg',
-        status: false,
-        installed: undefined,
-        name: "Rosalie's Mupen Gui",
-      },
-      mame: { id: 'mame', status: false, name: 'MAME' },
-      vita3k: {
-        id: 'vita3k',
-        status: true,
-        installed: undefined,
-        name: 'Vita3K',
+        platforms: 'Playstation',
       },
       flycast: {
         id: 'flycast',
         status: false,
         installed: undefined,
         name: 'Flycast',
+        platforms: 'Dreamcast',
       },
-      scummvm: {
-        id: 'scummvm',
+      lime3ds: {
+        id: 'lime3ds',
+        status: false,
+        installed: undefined,
+        name: 'Lime3DS',
+        platforms: 'Nintendo 3DS',
+      },
+      mame: {
+        id: 'mame',
+        status: false,
+        name: 'MAME',
+        platforms: 'Arcade',
+      },
+      melonds: {
+        id: 'melonds',
         status: true,
         installed: undefined,
-        name: 'ScummVM',
+        name: 'melonDS',
+        platforms: 'Nintendo DS',
       },
-      xenia: {
-        id: 'xenia',
-        status: true,
-        installed: false,
-        name: 'Xenia',
-      },
-      mgba: { id: 'mgba', status: false, installed: undefined, name: 'mGBA' },
-      ares: { id: 'ares', status: false, installed: undefined, name: 'ares' },
-      supermodel: {
-        id: 'supermodel',
-        status: true,
+      mgba: {
+        id: 'mgba',
+        status: false,
         installed: undefined,
-        name: 'Supermodel',
+        name: 'mGBA',
+        platforms: 'GameBoy Advance',
       },
       model2: {
         id: 'model2',
         status: true,
         installed: undefined,
         name: 'Model2',
+        platforms: 'Arcade',
       },
-      bigpemu: {
-        id: 'bigpemu',
+      pcsx2: {
+        id: 'pcsx2',
+        status: true,
+        installed: undefined,
+        name: 'PCSX2',
+        platforms: 'Playstation 2',
+      },
+      ppsspp: {
+        id: 'ppsspp',
+        status: true,
+        installed: undefined,
+        name: 'PPSSPP',
+        platforms: 'Sony PSP',
+      },
+      primehack: {
+        id: 'primehack',
+        status: true,
+        installed: undefined,
+        name: 'Primehack',
+        platforms: 'Metroid Prime',
+      },
+      ra: {
+        id: 'ra',
+        status: true,
+        installed: undefined,
+        name: 'RetroArch',
+        platforms: 'Retro systems',
+      },
+      rmg: {
+        id: 'rmg',
         status: false,
         installed: undefined,
-        name: 'BigPEmu',
+        name: "Rosalie's Mupen Gui",
+        platforms: 'Nintendo 64',
+      },
+      rpcs3: {
+        id: 'rpcs3',
+        status: true,
+        installed: undefined,
+        name: 'RPCS3',
+        platforms: 'Playstation 3',
+      },
+      ryujinx: {
+        id: 'ryujinx',
+        status: true,
+        installed: undefined,
+        name: 'Ryujinx',
+        platforms: 'Nintendo Switch',
+      },
+      scummvm: {
+        id: 'scummvm',
+        status: true,
+        installed: undefined,
+        name: 'ScummVM',
+        platforms: 'DOS Games',
+      },
+      shadps4: {
+        id: 'shadps4',
+        status: true,
+        installed: undefined,
+        name: 'ShadPS4',
+        platforms: 'Playstation 4',
+      },
+      supermodel: {
+        id: 'supermodel',
+        status: true,
+        installed: undefined,
+        name: 'Supermodel',
+        platforms: 'Arcade',
+      },
+      vita3k: {
+        id: 'vita3k',
+        status: true,
+        installed: undefined,
+        name: 'Vita3K',
+        platforms: 'PS Vita',
+      },
+      xemu: {
+        id: 'xemu',
+        status: true,
+        installed: undefined,
+        name: 'Xemu',
+        platforms: 'Xbox',
+      },
+      xenia: {
+        id: 'xenia',
+        status: true,
+        installed: false,
+        name: 'Xenia',
+        platforms: 'Xbox 360',
+      },
+      yuzu: {
+        id: 'yuzu',
+        status: false,
+        installed: undefined,
+        name: 'Yuzu',
+        platforms: 'Nintendo Switch',
+      },
+      srm: {
+        id: 'srm',
+        status: false,
+        installed: undefined,
+        name: 'Steam Rom Manager',
       },
     },
     overwriteConfigEmus: {
-      ra: { id: 'ra', status: true, name: 'RetroArch' },
-      dolphin: { id: 'dolphin', status: true, name: 'Dolphin' },
-      primehack: { id: 'primehack', status: true, name: 'Primehack' },
-      ppsspp: { id: 'ppsspp', status: true, name: 'PPSSPP' },
-      duckstation: { id: 'duckstation', status: true, name: 'DuckStation' },
-      melonds: { id: 'melonds', status: true, name: 'melonDS' },
-      citra: { id: 'citra', status: false, name: 'Citra' },
-      pcsx2: { id: 'pcsx2', status: true, name: 'PCSX2' },
-      rpcs3: { id: 'rpcs3', status: true, name: 'RPCS3' },
-      yuzu: { id: 'yuzu', status: false, name: 'Yuzu' },
-      ryujinx: { id: 'ryujinx', status: false, name: 'Ryujinx' },
-      xemu: { id: 'xemu', status: true, name: 'Xemu' },
-      xenia: { id: 'xenia', status: true, name: 'Xenia' },
-      cemu: { id: 'cemu', status: true, name: 'Cemu' },
-      srm: { id: 'srm', status: true, name: 'Steam Rom Manager' },
-      esde: { id: 'esde', status: true, name: 'EmulationStation DE' },
-      pegasus: { id: 'pegasus', status: true, name: 'Pegasus' },
-      rmg: { id: 'rmg', status: false, name: "Rosalie's Mupen Gui" },
-      mame: { id: 'mame', status: false, name: 'MAME' },
-      vita3k: { id: 'vita3k', status: true, name: 'Vita3K' },
-      flycast: { id: 'flycast', status: false, name: 'Flycast' },
-      scummvm: { id: 'scummvm', status: true, name: 'ScummVM' },
-      mgba: { id: 'mgba', status: false, name: 'mGBA' },
       ares: { id: 'ares', status: false, name: 'ares' },
-      supermodel: { id: 'supermodel', status: true, name: 'Supermodel' },
-      model2: { id: 'model2', status: true, name: 'Model2' },
       bigpemu: {
         id: 'bigpemu',
         status: false,
         name: 'BigPEmu',
       },
+      cemu: { id: 'cemu', status: true, name: 'Cemu' },
+      citra: { id: 'citra', status: true, name: 'Citra' },
+      dolphin: { id: 'dolphin', status: true, name: 'Dolphin' },
+      duckstation: { id: 'duckstation', status: true, name: 'DuckStation' },
+      flycast: { id: 'flycast', status: false, name: 'Flycast' },
+      lime3ds: { id: 'lime3ds', status: false, name: 'Lime3DS' },
+      mame: { id: 'mame', status: false, name: 'MAME' },
+      melonds: { id: 'melonds', status: true, name: 'melonDS' },
+      mgba: { id: 'mgba', status: false, name: 'mGBA' },
+      model2: { id: 'model2', status: true, name: 'Model2' },
+      pcsx2: { id: 'pcsx2', status: true, name: 'PCSX2' },
+      ppsspp: { id: 'ppsspp', status: true, name: 'PPSSPP' },
+      primehack: { id: 'primehack', status: true, name: 'Primehack' },
+      ra: { id: 'ra', status: true, name: 'RetroArch' },
+      rmg: { id: 'rmg', status: false, name: "Rosalie's Mupen Gui" },
+      rpcs3: { id: 'rpcs3', status: true, name: 'RPCS3' },
+      ryujinx: { id: 'ryujinx', status: false, name: 'Ryujinx' },
+      scummvm: { id: 'scummvm', status: true, name: 'ScummVM' },
+      shadps4: {
+        id: 'shadps4',
+        status: false,
+        name: 'ShadPS4',
+      },
+      supermodel: { id: 'supermodel', status: true, name: 'Supermodel' },
+      vita3k: { id: 'vita3k', status: true, name: 'Vita3K' },
+      xenia: { id: 'xenia', status: true, name: 'Xenia' },
+      xemu: { id: 'xemu', status: true, name: 'Xemu' },
+      yuzu: { id: 'yuzu', status: false, name: 'Yuzu' },
+      citron: { id: 'citron', status: false, name: 'Citron' },
+      esde: { id: 'esde', status: true, name: 'EmulationStation DE' },
+      pegasus: { id: 'pegasus', status: true, name: 'Pegasus' },
+      srm: { id: 'srm', status: false, name: 'Steam Rom Manager' },
     },
     installFrontends: {
       esde: {
         id: 'esde',
-        status: true,
+        status: false,
         installed: undefined,
         name: 'EmulationStation-DE',
-        desc: 'Add this launhcer to your Steam Library. Recommended for big colections',
+        desc: 'Add this launcher to your Steam Library. Recommended for big collections',
       },
       pegasus: {
         id: 'pegasus',
-        status: true,
+        status: false,
         installed: undefined,
         name: 'Pegasus',
-        desc: 'Add this launcher to your Steam Library. Recommended for big colections. You need to run EmulationStation parsers to show artwork in Pegasus Themes',
+        desc: 'Add this launcher to your Steam Library. Recommended for big collections. You need to run EmulationStation parsers to show artwork in Pegasus Themes',
+      },
+      deckyromlauncher: {
+        id: 'deckyromlauncher',
+        status: true,
+        name: 'Retro Library',
+        desc: 'A separate Retro Library that does not interfiere with your Games Library. All games and artwork are detected automatically.',
       },
       steam: {
         id: 'steam',
-        status: true,
+        status: false,
         installed: undefined,
         name: 'Steam Library',
         desc: 'Integrate your games inside your Steam Library. Recommended for curated collections',
@@ -441,13 +569,14 @@ export default function App() {
       multiemulator: 'ra',
       dreamcast: 'multiemulator',
     },
-    controllerLayout: 'bayx',
+    controllerLayout: 'baxy',
     revertParsers: false,
     resolutions: {
       dolphin: '720P',
       duckstation: '720P',
       pcsx2: '720P',
       yuzu: '720P',
+      citron: '720P',
       ppsspp: '720P',
       rpcs3: '720P',
       ryujinx: '720P',
@@ -455,6 +584,7 @@ export default function App() {
       cemu: '720P',
       xenia: '720P',
       citra: '720P',
+      lime3ds: '720P',
       vita3k: '720P',
       flycast: '720P',
       melonds: '720P',
@@ -572,16 +702,27 @@ export default function App() {
           <Route exact path="/power-tools" element={<PowerToolsPage />} />
           <Route exact path="/power-controls" element={<PowerControlsPage />} />
           <Route exact path="/decky-controls" element={<EmuDeckyPage />} />
+          <Route
+            exact
+            path="/decky-rom-launcher"
+            element={<DeckyRomLauncherPage />}
+          />
+          <Route
+            exact
+            path="/decky-rom-launcher-install"
+            element={<DeckyRomLauncherInstallPage />}
+          />
+
           <Route exact path="/help" element={<HelpPage />} />
           <Route exact path="/early-access" element={<EarlyAccessPage />} />
 
           <Route exact path="/chd-tool" element={<CHDToolPage />} />
           <Route exact path="/change-log" element={<ChangeLogPage />} />
-          <Route exact path="/settings" element={<SettingsPage />} />
+          <Route exact path="/settings" element={<QuickSettingsPage />} />
           <Route exact path="/check-bios" element={<CheckBiosPage />} />
 
-          <Route exact path="/emulators" element={<EmulatorsPage />}>
-            <Route path=":emulator" element={<EmulatorsPage />} />
+          <Route exact path="/emulators" element={<ManageEmulatorsPage />}>
+            <Route path=":emulator" element={<ManageEmulatorsPage />} />
           </Route>
 
           <Route exact path="/android-setup" element={<AndroidSetupPage />}>
@@ -639,6 +780,26 @@ export default function App() {
             exact
             path="/android-rom-storage"
             element={<AndroidRomStoragePage />}
+          />
+          <Route
+            exact
+            path="/android-frontend-selector"
+            element={<AndroidFrontendSelectorPage />}
+          />
+          <Route
+            exact
+            path="/android-emulator-selector"
+            element={<AndroidEmulatorSelectorPage />}
+          />
+          <Route
+            exact
+            path="/android-RA-bezels"
+            element={<AndroidRABezelsPage />}
+          />
+          <Route
+            exact
+            path="/android-own-apk"
+            element={<AndroidOwnAPKPage />}
           />
           <Route exact path="/android-end" element={<AndroidEndPage />} />
           <Route exact path="/android-finish" element={<AndroidFinishPage />} />

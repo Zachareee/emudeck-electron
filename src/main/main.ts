@@ -18,20 +18,28 @@ import MenuBuilder from './menu';
 // eslint-disable-next-line
 import { resolveHtmlPath } from './util';
 import fakeOSFile from '../data/local-fake-os.json';
-
 const { fakeOS } = fakeOSFile;
+
+import branchFile from '../data/branch.json';
+const { branchOG } = branchFile;
+
 const { shouldUseDarkColors } = nativeTheme;
 const EMUDECKWE = "https://github.com/Zachareee/emudeck-we.git"
 const os = require('os');
 const fs = require('fs');
 const lsbRelease = require('lsb-release');
+let appDataPath = app.getPath('userData');
+
+if (os.platform().includes('darwin')) {
+  appDataPath = `${os.homedir()}/.config/EmuDeck`;
+}
 
 const homeUser = os.homedir();
 let allPath;
 if (os.platform().includes('win32')) {
-  allPath = `${homeUser}/AppData/Roaming/EmuDeck/backend/functions/all.ps1`;
+  allPath = `${appDataPath}/backend/functions/all.ps1`;
 } else {
-  allPath = `${homeUser}/.config/EmuDeck/backend/functions/all.sh`;
+  allPath = `${appDataPath}/backend/functions/all.sh`;
 }
 let startCommand;
 let finishCommand;
@@ -49,9 +57,9 @@ export default class AppUpdater {
   }
 }
 
-fs.exists(`${os.homedir()}/emudeck/logs/emudeckApp.log`, (exists: any) => {
+fs.exists(`${appDataPath}/logs/emudeckApp.log`, (exists: any) => {
   if (exists) {
-    fs.unlinkSync(`${os.homedir()}/emudeck/logs/emudeckApp.log`);
+    fs.unlinkSync(`${appDataPath}/logs/emudeckApp.log`);
   }
 });
 
@@ -75,11 +83,10 @@ const logCommand = (
   const mm = String(today.getMonth() + 1).padStart(2, '0'); // January is 0!
   const yyyy = today.getFullYear();
   const date = `${mm}/${dd}/${yyyy}`;
-  const homedir = os.homedir();
 
-  let logFile = `${homedir}/emudeck/logs/emudeckApp.log`;
+  let logFile = `${appDataPath}/logs/emudeckApp.log`;
   if (os.platform().includes('win32')) {
-    logFile = `${homedir}\\emudeck\\logs\\emudeckApp.log`;
+    logFile = `${appDataPath}\\logs\\emudeckApp.log`;
   }
 
   const bashCommandString = bashCommand ? bashCommand.toString() : '';
@@ -172,7 +179,7 @@ const createWindow = async () => {
   const { screen } = require('electron');
   const primaryDisplay = screen.getPrimaryDisplay();
   const { height } = primaryDisplay.workAreaSize;
-  const screenHeight = height < 701 ? 600 : 720;
+  const screenHeight = height < 701 ? 600 : 740;
   const isFullscreen = false;
   // const os = require('os');
 
@@ -206,12 +213,6 @@ const createWindow = async () => {
       resizable: true,
       fullscreen: app.commandLine.hasSwitch('no-sandbox') ? true : isFullscreen,
       autoHideMenuBar: true,
-      titleBarStyle: 'hidden',
-      titleBarOverlay: {
-        color: shouldUseDarkColors ? '#FFFFFF00' : '#FFFFFF00',
-        symbolColor: shouldUseDarkColors ? '#FFFFFF' : '#444',
-        height: 30,
-      },
       webPreferences: {
         preload: app.isPackaged
           ? path.join(__dirname, 'preload.js')
@@ -226,8 +227,7 @@ const createWindow = async () => {
       width: 1280,
       // width: 1280,
       height: screenHeight,
-      titleBarStyle: 'hidden',
-      trafficLightPosition: { x: 20, y: 20 },
+      trafficLightPosition: { x: 8, y: 8 },
       icon: getAssetPath('icon.png'),
       resizable: true,
       fullscreen: app.commandLine.hasSwitch('no-sandbox') ? true : isFullscreen,
@@ -246,7 +246,6 @@ const createWindow = async () => {
       width: 1280,
       // width: 1280,
       height: screenHeight,
-      titleBarStyle: 'hidden',
       icon: getAssetPath('icon.png'),
       resizable: true,
       fullscreen: app.commandLine.hasSwitch('no-sandbox') ? true : isFullscreen,
@@ -373,10 +372,13 @@ ipcMain.on('emudeck', async (event, command) => {
     // file exists
   } else {
     event.reply(backChannel, 'nogit');
-    let bashCommand = `rm -rf ~/.config/EmuDeck/backend && mkdir -p ~/.config/EmuDeck/backend && git clone --no-single-branch --depth=1 https://github.com/dragoonDorise/EmuDeck.git ~/.config/EmuDeck/backend/ && cd ~/.config/EmuDeck/backend && git checkout master && touch ~/.config/EmuDeck/.cloned && printf "ec" && echo true`;
-
+    let bashCommand;
     if (os.platform().includes('win32')) {
-      bashCommand = `cd %userprofile% && cd AppData && cd Roaming && cd EmuDeck && powershell -ExecutionPolicy Bypass -command "& { Start-Transcript "$env:USERPROFILE/EmuDeck/logs/pull.log";  git clone --no-single-branch --depth=1 ${EMUDECKWE} ./backend; Stop-Transcript"} && cd backend && git config user.email "emudeck@emudeck.com" && git config user.name "EmuDeck" && git checkout master && cd %userprofile% && if not exist emudeck mkdir emudeck && cd emudeck && CLS && echo true`;
+      bashCommand = `cd %userprofile% && cd AppData && cd Roaming && cd EmuDeck && powershell -ExecutionPolicy Bypass -command "& { Start-Transcript "$env:USERPROFILE/EmuDeck/logs/pull.log"; git config --global http.lowSpeedLimit 1000 ; git config --global http.lowSpeedTime 60 ; git config --global http.postBuffer 524288000 ; git clone --no-single-branch --depth=1 ${EMUDECKWE} ./backend; Stop-Transcript"} && cd backend && git config user.email "emudeck@emudeck.com" && git config user.name "EmuDeck" && git checkout ${branchOG} && cd %userprofile% && if not exist emudeck mkdir emudeck && cd emudeck && Stop-Transcript; && CLS && echo true`;
+    } else if (os.platform().includes('darwin')) {
+      bashCommand = `rm -rf ~/.config/EmuDeck/backend && mkdir -p ~/.config/EmuDeck/backend && git config --global http.lowSpeedLimit 1000 && git config --global http.lowSpeedTime 60 && git config --global http.postBuffer 524288000 && git clone --no-single-branch --depth=1 https://github.com/EmuDeck/emudeck-darwin.git ~/.config/EmuDeck/backend/ && cd ~/.config/EmuDeck/backend && git checkout ${branchOG} && touch ~/.config/EmuDeck/.cloned && printf "ec" && echo true`;
+    } else {
+      bashCommand = `rm -rf ~/.config/EmuDeck/backend && mkdir -p ~/.config/EmuDeck/backend && git config --global http.lowSpeedLimit 1000 && git config --global http.lowSpeedTime 60 && git config --global http.postBuffer 524288000 && git clone --no-single-branch --depth=1 https://github.com/dragoonDorise/EmuDeck.git ~/.config/EmuDeck/backend/ && cd ~/.config/EmuDeck/backend && git checkout ${branchOG} && touch ~/.config/EmuDeck/.cloned && printf "ec" && echo true`;
     }
 
     return exec(`${bashCommand}`, shellType, (error, stdout, stderr) => {
@@ -444,9 +446,9 @@ ipcMain.on('getMSG', async (event) => {
   let bashCommand;
 
   if (os.platform().includes('win32')) {
-    bashCommand = `more %USERPROFILE%\\AppData\\Roaming\\EmuDeck\\msg.log`;
+    bashCommand = `more %USERPROFILE%\\AppData\\Roaming\\EmuDeck\\logs\\msg.log`;
   } else {
-    bashCommand = `cat "$HOME/emudeck/logs/msg.log"`;
+    bashCommand = `cat "$HOME/.config/EmuDeck/logs/msg.log"`;
   }
 
   return exec(`${bashCommand}`, shellType, (error, stdout, stderr) => {
@@ -528,10 +530,7 @@ ipcMain.on('update-check', async (event) => {
         event.reply('update-check-out', ['up-to-date', updateInfo]);
         logCommand(`${JSON.stringify(updateInfo)}`);
       } else {
-        exec(
-          `echo "[$(date)] UPDATE: UPDATING!" >> $HOME/emudeck/logs/EmudeckUpdate.log`,
-          shellType
-        );
+        exec(`echo "[$(date)] UPDATE: UPDATING!"`, shellType);
         logCommand('UPDATE: UPDATING!');
 
         event.reply('update-check-out', ['update-available', updateInfo]);
@@ -543,7 +542,7 @@ ipcMain.on('update-check', async (event) => {
     });
 
   // Abort the update if it hangs
-  const abortPromise = new Promise(function (resolve: any) {
+  const abortPromise = new Promise(function(resolve: any) {
     setTimeout(resolve, 10000, 'abort');
   });
 
@@ -598,10 +597,7 @@ ipcMain.on('update-start', async (event) => {
         event.reply('update-check-out', ['up-to-date', updateInfo]);
         logCommand(`${JSON.stringify(updateInfo)}`);
       } else {
-        exec(
-          `echo "[$(date)] UPDATE: UPDATING!" >> $HOME/emudeck/logs/EmudeckUpdate.log`,
-          shellType
-        );
+        exec(`echo "[$(date)] UPDATE: UPDATING!"`, shellType);
         logCommand('UPDATE: UPDATING!');
 
         event.reply('update-check-out', ['updating', updateInfo]);
@@ -627,7 +623,7 @@ ipcMain.on('update-start', async (event) => {
     });
 
   // Abort the update if it hangs
-  const abortPromise = new Promise(function (resolve: any) {
+  const abortPromise = new Promise(function(resolve: any) {
     setTimeout(resolve, 10000, 'abort');
   });
 
@@ -677,83 +673,73 @@ ipcMain.on('version', async (event: any) => {
 //
 // Installing  Bash / PowerShell backend
 //
+ipcMain.on('check-git', async (event) => {
+  const backChannel = 'check-git';
+  let bashCommand = `cd ~/.config/EmuDeck/backend/ && git rev-parse --is-inside-work-tree`;
 
-ipcMain.on('git-magic', async (event, branch) => {
-  const git = require('isomorphic-git');
-  const http = require('isomorphic-git/http/node');
-  let repo = 'https://github.com/dragoonDorise/EmuDeck.git';
-  let dir = path.join(app.getPath('appData'), '/EmuDeck/backend');
+  if (os.platform().includes('win32')) {
+    bashCommand = `cd %userprofile% && cd AppData && cd Roaming && cd EmuDeck && cd backend && git rev-parse --is-inside-work-tree`;
+  }
+  return exec(`${bashCommand}`, shellType, (error, stdout, stderr) => {
+    logCommand(bashCommand, error, stdout, stderr);
+    event.reply(backChannel, error, stdout, stderr);
+  });
+});
+
+ipcMain.on('clone', async (event, branch) => {
+  const branchGIT = branch;
+  let repo;
   if (os.platform().includes('win32')) {
     repo = EMUDECKWE;
-    dir = path.join(app.getPath('appData'), '/EmuDeck/backend');
+  } else if (os.platform().includes('darwin')) {
+    repo = 'https://github.com/EmuDeck/emudeck-darwin.git';
   } else {
-    dir = path.join(os.homedir(), '.config/EmuDeck/backend');
+    repo = 'https://github.com/dragoonDorise/EmuDeck.git';
   }
-  console.log({ dir });
-  let message;
-  let bashCommand = `. ~/.config/EmuDeck/backend/functions/all.sh && appImageInit`;
+
+  const backChannel = 'clone';
+  let bashCommand;
   if (os.platform().includes('win32')) {
-    bashCommand = `powershell -ExecutionPolicy Bypass -command "& { cd $env:USERPROFILE ; cd AppData ; cd Roaming  ; cd EmuDeck ; cd backend ; cd functions ; . ./all.ps1 ; appImageInit "}`;
-  }
-
-  let status = await git.status({ fs, dir, filepath: 'README.md' });
-  console.log({ status });
-  if (status === 'absent') {
-    await git
-      .clone({
-        fs,
-        http,
-        dir,
-        url: repo,
-        depth: 1,
-        onMessage: console.log,
-      })
-      .then((message = 'success'))
-      .catch((message = 'error'));
+    bashCommand = `cd %userprofile% && cd AppData && cd Roaming && cd EmuDeck && powershell -ExecutionPolicy Bypass -command "& { mkdir "$env:APPDATA/EmuDeck/logs"  -ErrorAction SilentlyContinue; Start-Transcript "$env:APPDATA/EmuDeck/logs/git.log"; git config --global http.lowSpeedLimit 1000 ; git config --global http.lowSpeedTime 60 ; git config --global http.postBuffer 524288000 ; git clone --no-single-branch --depth=1 ${repo} ./backend; Stop-Transcript"} && cd backend  && git config user.email "emudeck@emudeck.com" && git config user.name "EmuDeck" && git checkout ${branchGIT} && cd %userprofile% && if not exist emudeck mkdir emudeck && cd emudeck && CLS && Stop-Transcript && echo true `;
   } else {
-    await git
-      .pull({
-        fs,
-        http,
-        dir,
-        singleBranch: true,
-        author: { name: 'EmuDeck', email: 'noemail@emudeck.com' },
-      })
-      .then((message = 'success'));
+    bashCommand = `rm -rf ~/.config/EmuDeck/backend && mkdir -p ~/.config/EmuDeck/backend && mkdir -p ~/emudeck/logs && git config --global http.lowSpeedLimit 1000 && git config --global http.lowSpeedTime 60 && git config --global http.postBuffer 524288000 && git clone --no-single-branch --depth=1 ${repo} ~/.config/EmuDeck/backend/ && cd ~/.config/EmuDeck/backend && git checkout ${branchGIT} && touch ~/.config/EmuDeck/.cloned && printf "ec" && echo true`;
   }
-
-  status = await git.status({ fs, dir, filepath: 'README.md' });
-  if (status === 'absent') {
-    message = 'error';
-  } else {
-    message = 'success';
-  }
-
-  await git.checkout({
-    fs,
-    dir,
-    ref: branch,
+  return exec(`${bashCommand}`, shellType, (error, stdout, stderr) => {
+    logCommand(bashCommand, error, stdout, stderr);
+    event.reply(backChannel, error, stdout, stderr);
   });
+});
+
+ipcMain.on('pull', async (event, branch) => {
+  const branchGIT = branch;
+  const backChannel = 'pull';
+  let bashCommand = `cd ~/.config/EmuDeck/backend && git reset --hard && git clean -fd && git checkout ${branchGIT} && git pull && . ~/.config/EmuDeck/backend/functions/all.sh && appImageInit`;
+
+  if (os.platform().includes('win32')) {
+    bashCommand = `cd %userprofile% && cd AppData && cd Roaming && cd EmuDeck && cd backend && powershell -ExecutionPolicy Bypass -command "& { Start-Transcript "$env:APPDATA/EmuDeck/logs/git.log"; git reset --hard ; git clean -fd ; git checkout ${branchGIT} ; git pull --allow-unrelated-histories -X theirs;cd $env:USERPROFILE ; cd AppData ; cd Roaming  ; cd EmuDeck ; cd backend ; cd functions ; . ./all.ps1 ; appImageInit; Stop-Transcript; "}`;
+  }
 
   return exec(`${bashCommand}`, shellType, (error, stdout, stderr) => {
     logCommand(bashCommand, error, stdout, stderr);
-    event.reply('git-magic', message);
+    event.reply(backChannel, stdout);
   });
+});
 
-  //   const backChannel = 'check-git-status';
-  //   let bashCommand = `cd ~/.config/EmuDeck/backend && git status`;
-  //
-  //   if (os.platform().includes('darwin')) {
-  //     bashCommand = `cd ~/.config/EmuDeck/backend && git status`;
-  //   }
-  //   if (os.platform().includes('win32')) {
-  //     bashCommand = `cd %userprofile% && cd AppData && cd Roaming && cd EmuDeck && cd backend && git status`;
-  //   }
-  //
-  //   return exec(`${bashCommand}`, shellType, (error, stdout, stderr) => {
-  //     logCommand(bashCommand, error, stdout, stderr);
-  //     event.reply(backChannel, stdout);
-  //   });
+ipcMain.on('check-git-status', async (event) => {
+  const backChannel = 'check-git-status';
+  let bashCommand = `cd ~/.config/EmuDeck/backend && git status`;
+
+  if (os.platform().includes('darwin')) {
+    bashCommand = `cd ~/.config/EmuDeck/backend && git status`;
+  }
+  if (os.platform().includes('win32')) {
+    bashCommand = `cd %userprofile% && cd AppData && cd Roaming && cd EmuDeck && cd backend && git status`;
+  }
+
+  return exec(`${bashCommand}`, shellType, (error, stdout, stderr) => {
+    logCommand(bashCommand, error, stdout, stderr);
+    event.reply(backChannel, stdout);
+  });
 });
 
 // Next release
@@ -784,7 +770,7 @@ ipcMain.on('isGameMode', async (event) => {
 
 // Other
 ipcMain.on('clean-log', async () => {
-  exec(`echo "[$(date)] App Installed" > $HOME/emudeck/logs/EmudeckApp.log`, {
+  exec(`echo "[$(date)] App Installed"`, {
     shell: '/bin/bash',
   });
 });
@@ -817,7 +803,7 @@ ipcMain.on('setToken', async (event, command) => {
   let bashCommand = `. ~/.config/EmuDeck/backend/functions/all.sh && echo ${token} > "$HOME/.config/EmuDeck/.rat" && echo ${user} > "$HOME/.config/EmuDeck/.rau" && RetroArch_retroAchievementsSetLogin && DuckStation_retroAchievementsSetLogin && PCSX2QT_retroAchievementsSetLogin && echo true`;
 
   if (os.platform().includes('win32')) {
-    bashCommand = `cd $env:USERPROFILE ; cd AppData ; cd Roaming  ; cd EmuDeck ; cd backend ; cd functions ; . ./all.ps1 ; echo ${token} > "%userprofile%/AppData/Roaming/EmuDeck/.rat"; ; echo ${user} > "%userprofile%/AppData/Roaming/EmuDeck/.rau"; RetroArch_retroAchievementsSetLogin ; DuckStation_retroAchievementsSetLogin ; PCSX2_retroAchievementsSetLogin ; echo true`;
+    bashCommand = `cd $env:USERPROFILE ; cd AppData ; cd Roaming  ; cd EmuDeck ; cd backend ; cd functions ; . ./all.ps1; . ./JSONtoPS1.ps1; JSONtoPS1; . ./all.ps1; RetroArch_retroAchievementsSetLogin ; DuckStation_retroAchievementsSetLogin ; PCSX2_retroAchievementsSetLogin ; echo true`;
   }
 
   return exec(`${bashCommand}`, shellType, (error, stdout, stderr) => {
@@ -840,12 +826,12 @@ ipcMain.on('saveSettings', async (event, command) => {
 
   const homedir = require('os').homedir();
 
-  let settingsFile = `${homedir}/.config/EmuDeck/settings.json`;
+  let settingsFile = `${appDataPath}/settings.json`;
   if (os.platform().includes('win32')) {
-    settingsFile = `${homedir}/AppData/Roaming/EmuDeck/settings.json`;
+    settingsFile = `${appDataPath}/settings.json`;
   }
 
-  fs.writeFile(settingsFile, jsonContent, 'utf8', function (err: any) {
+  fs.writeFile(settingsFile, jsonContent, 'utf8', function(err: any) {
     if (err) {
       event.reply(backChannel, err);
     }
@@ -858,17 +844,11 @@ ipcMain.on('check-versions', async (event) => {
   const backChannel = 'check-versions';
   let jsonPath = `${userHomeDir}/.config/EmuDeck/backend/versions.json`;
   if (os.platform().includes('win32')) {
-    jsonPath = `${userHomeDir}/AppData/Roaming/EmuDeck/backend/versions.json`;
+    jsonPath = `${appDataPath}/backend/versions.json`;
   }
   try {
-    let json;
-    if (fs.existsSync(jsonPath)) {
-      const data = fs.readFileSync(jsonPath);
-      json = JSON.parse(data);
-    } else {
-      json = {};
-    }
-
+    const data = fs.readFileSync(jsonPath);
+    const json = JSON.parse(data);
     event.reply(backChannel, json);
   } catch (err) {
     console.error(err);
@@ -908,7 +888,7 @@ ipcMain.on('get-store-featured', async (event) => {
   let jsonPath;
 
   if (os.platform().includes('win32')) {
-    jsonPath = `${userHomeDir}/AppData/Roaming/EmuDeck/backend/store/featured.json`;
+    jsonPath = `${appDataPath}/backend/store/featured.json`;
   } else {
     jsonPath = `${userHomeDir}/.config/EmuDeck/backend/store/featured.json`;
   }
@@ -929,7 +909,11 @@ ipcMain.on('get-store', async (event) => {
 
   const buildJsonStore = async () => {
     // GB HomebrewGames
-    const dir = `${os.homedir()}/emudeck/store/`;
+    let dir = `${appDataPath}/store/`;
+    if (os.platform().includes('win32')) {
+      dir = `${appDataPath}/store/`;
+    }
+
     let jsonArray: any = [];
 
     await new Promise((resolve: any, reject: any) => {
@@ -953,7 +937,10 @@ ipcMain.on('get-store', async (event) => {
         resolve(storeJson);
       });
     }).then(async (storeJson: any) => {
-      const dir = `${os.homedir()}/emudeck/feeds/`;
+      let dir = `${appDataPath}/feeds/`;
+      if (os.platform().includes('win32')) {
+        dir = `${appDataPath}/feeds/`;
+      }
       let jsonArray: any = [];
 
       await new Promise((resolve: any, reject: any) => {
@@ -989,17 +976,22 @@ ipcMain.on('get-store', async (event) => {
           resolve(fullJson);
         });
       }).then((fullJson: any) => {
-        fs.writeFileSync(
-          `${os.homedir()}/emudeck/store/store.json`,
-          JSON.stringify(fullJson)
-        );
+        let file = `${appDataPath}/store/store.json`;
+        if (os.platform().includes('win32')) {
+          file = `${appDataPath}/store/store.json`;
+        }
+
+        fs.writeFileSync(file, JSON.stringify(fullJson));
       });
     });
   };
 
   buildJsonStore()
     .then(() => {
-      const jsonPath = `${userHomeDir}/emudeck/store/store.json`;
+      let jsonPath = `${appDataPath}/store/store.json`;
+      if (os.platform().includes('win32')) {
+        jsonPath = `${appDataPath}/store/store.json`;
+      }
       const data = fs.readFileSync(jsonPath);
       const json = JSON.parse(data);
       event.reply(backChannel, json);
@@ -1015,11 +1007,11 @@ ipcMain.on('build-store', async (event) => {
     // GB HomebrewGames
     let dir: any;
     if (os.platform().includes('win32')) {
-      dir = `${os.homedir()}/AppData/Roaming/EmuDeck/backend/store/${system}/`;
+      dir = `${appDataPath}/backend/store/${system}/`;
     } else {
-      dir = `${os.homedir()}/.config/EmuDeck/backend/store/${system}/`;
+      dir = `${appDataPath}/backend/store/${system}/`;
     }
-    const dirStore = `${os.homedir()}/emudeck/store`;
+    const dirStore = `${appDataPath}/store`;
 
     if (!fs.existsSync(dirStore)) {
       fs.mkdirSync(dirStore);
@@ -1049,10 +1041,12 @@ ipcMain.on('build-store', async (event) => {
         };
         resolve(storeJson);
       }).then((storeJson: any) => {
-        fs.writeFileSync(
-          `${os.homedir()}/emudeck/store/${system}.json`,
-          JSON.stringify(storeJson)
-        );
+        let file = `${appDataPath}/store/${system}.json`;
+        if (os.platform().includes('win32')) {
+          file = `${appDataPath}/store/${system}.json`;
+        }
+
+        fs.writeFileSync(file, JSON.stringify(storeJson));
       });
     });
     // buildJsonStore();
@@ -1060,7 +1054,7 @@ ipcMain.on('build-store', async (event) => {
 
   buildJson('gb', 'GameBoy');
   buildJson('gbc', 'GameBoy Color');
-  buildJson('gba', 'GameBoy Advance');
+  buildJson('gba', 'GameBoy Advanced');
   buildJson('genesis', 'Genesis');
   buildJson('mastersystem', 'Master System');
   buildJson('nes', 'NES');
@@ -1176,7 +1170,7 @@ ipcMain.on('validate-7Zip', async (event) => {
   const homeUser = os.homedir();
   const path1 = `${programFilesPath}/7-zip`;
   const path2 = `${programFilesPath} (x86)/7-zip`;
-  const path3 = `${homeUser}/AppData/Roaming/EmuDeck/backend/wintools/7z.exe`;
+  const path3 = `${appDataPath}/backend/wintools/7z.exe`;
   if (fs.existsSync(path1)) {
     event.reply(backChannel, {
       stdout: true,
@@ -1300,7 +1294,7 @@ ipcMain.on('run-app', async (event, appPath) => {
     // externalApp = spawn('xdg-open', [appPathFixed]);
   }
 
-  fs.writeFileSync(`${os.homedir()}/emudeck/logs/run-app.log`, appPathFixed);
+  fs.writeFileSync(`${appDataPath}/logs/run-app.log`, appPathFixed);
 
   externalApp.on('error', (err: any) => {
     event.reply('run-app', err);

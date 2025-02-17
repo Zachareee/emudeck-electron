@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useEffect, useState, useContext, useRef } from 'react';
 import { GlobalContext } from 'context/globalContext';
 import { BtnSimple } from 'getbasecore/Atoms';
@@ -12,6 +13,7 @@ import ProgressBar from 'components/atoms/ProgressBar/ProgressBar';
 import PatreonLogin from 'components/organisms/PatreonLogin/PatreonLogin';
 
 function CloudSyncPageConfig() {
+  const { t, i18n } = useTranslation();
   const { state, setState } = useContext(GlobalContext);
   const json = JSON.stringify(state);
   const { cloudSync, cloudSyncType, system, mode } = state;
@@ -157,6 +159,7 @@ function CloudSyncPageConfig() {
     ipcChannel.sendMessage('emudeck', [`cloudSyncHealth|||cloudSyncHealth`]);
 
     ipcChannel.once('cloudSyncHealth', (message) => {
+      console.log({ message });
       const { stdout } = message;
       let modalData;
       if (stdout.includes('true')) {
@@ -183,24 +186,6 @@ function CloudSyncPageConfig() {
   };
 
   const installRclone = () => {
-    // OLD TOKEN upload, not needed for now
-    // if (
-    //   confirm(
-    //     'Press OK if you already have CloudSync installed on another EmuDeck installation and you want to sync that installation to this one, if not, press Cancel'
-    //   ) === true
-    // ) {
-    //   ipcChannel.sendMessage('emudeck', [
-    //     `cloud_sync_install_and_config_with_code|||cloud_sync_install_and_config_with_code ${cloudSync}`,
-    //   ]);
-    //   ipcChannel.once('cloud_sync_install_and_config_with_code', (message) => {
-    //     // No versioning found, what to do?
-    //
-    //     alert(
-    //       `All Done, every time you load a game your Game states and Saved games will be synced to ${cloudSync}`
-    //     );
-    //   });
-    // } else {
-
     const modalData = {
       active: true,
       header: <span className="h4">Installing Cloud{cloudSyncType}</span>,
@@ -217,9 +202,14 @@ function CloudSyncPageConfig() {
 
     let cloudFunction;
     cloudFunction = 'cloud_sync_install_and_config ';
-
+    let patreonToken = undefined;
+    patreonToken = localStorage.getItem('patreon_token');
+    if (patreonToken) {
+      patreonToken = patreonToken.replaceAll('|', '-');
+    }
+    console.log(`cloud_saves|||${cloudFunction} ${cloudSync} ${patreonToken}`);
     ipcChannel.sendMessage('emudeck', [
-      `cloud_saves|||${cloudFunction} ${cloudSync}`,
+      `cloud_saves|||${cloudFunction} ${cloudSync} ${patreonToken}`,
     ]);
 
     ipcChannel.once('cloud_saves', (message) => {
@@ -377,47 +367,45 @@ function CloudSyncPageConfig() {
   };
 
   return (
-    <div style={{ height: '100vh' }}>
-      <Wrapper>
-        {cloudSyncType === 'Sync' && (
-          <PatreonLogin>
-            <Header title="Cloud Sync - Select your provider" />
-            <CloudSyncConfig
-              onClick={cloudSyncSet}
-              onClickInstall={installRclone}
-              onClickUninstall={uninstallRclone}
-              onClickCheckHealth={checkHealth}
-              disableButton={disableButton}
-              showLoginButton={showLoginButton}
-            />
+    <Wrapper>
+      {cloudSyncType === 'Sync' && (
+        <PatreonLogin>
+          <Header title="Cloud Sync - Select your provider" />
+          <CloudSyncConfig
+            onClick={cloudSyncSet}
+            onClickInstall={installRclone}
+            onClickUninstall={uninstallRclone}
+            onClickCheckHealth={checkHealth}
+            disableButton={disableButton}
+            showLoginButton={showLoginButton}
+          />
 
-            <EmuModal modal={modal} />
-          </PatreonLogin>
-        )}
+          <EmuModal modal={modal} />
+        </PatreonLogin>
+      )}
 
-        {cloudSyncType === 'Save' && (
-          <>
-            <Header title="Cloud Backup - Select your provider" />
-            <CloudSyncConfig
-              onClick={cloudSyncSet}
-              onClickInstall={installRclone}
-              onClickUninstall={uninstallRclone}
-              onClickCheckHealth={checkHealth}
-              disableButton={disableButton}
-              showLoginButton={showLoginButton}
-            />
+      {cloudSyncType === 'Save' && (
+        <>
+          <Header title="Cloud Backup - Select your provider" />
+          <CloudSyncConfig
+            onClick={cloudSyncSet}
+            onClickInstall={installRclone}
+            onClickUninstall={uninstallRclone}
+            onClickCheckHealth={checkHealth}
+            disableButton={disableButton}
+            showLoginButton={showLoginButton}
+          />
 
-            <EmuModal modal={modal} />
-          </>
-        )}
-        <Footer
-          next={nextButtonStatus()}
-          nextText="Copy games"
-          disabledNext={disabledNext}
-          disabledBack={disabledBack}
-        />
-      </Wrapper>
-    </div>
+          <EmuModal modal={modal} />
+        </>
+      )}
+      <Footer
+        next={nextButtonStatus()}
+        nextText="Copy games"
+        disabledNext={disabledNext}
+        disabledBack={disabledBack}
+      />
+    </Wrapper>
   );
 }
 
